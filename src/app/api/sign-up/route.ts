@@ -49,13 +49,13 @@ export async function POST(request: Request) {
                 isAcceptingMessages : true,
                 messages : []
             })
-
             await newUser.save();
+            console.log("New user created:", newUser);
 
         }
         // send verification email
         const emailResponse =  await sendVerificationEmail(email, username, verifyCode);
-
+        console.log("Email response:", emailResponse);
         if(!emailResponse.success){
             return Response.json({
                 success : false,
@@ -66,8 +66,6 @@ export async function POST(request: Request) {
             success : true,
             message : "User registered successfully.  please Verify your email",
         }, {status : 201});
-
-        
     }
     catch (error) {
         console.error("Error registering user:", error);
