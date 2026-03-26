@@ -72,7 +72,6 @@ const VerifyAccount = () => {
                       className="w-full h-12 text-lg rounded-lg"
                     />
                   </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}
