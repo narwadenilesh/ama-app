@@ -8,41 +8,53 @@ export async function POST(request: Request) {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
-    const user : User = session?.user
-    if(!session || !session?.user){
+
+    if (!session || !session.user) {
         return Response.json({
-            success : false,
-            message : "Not authonticated"
-        }, {status : 401});
+            success: false,
+            message: "Not authenticated"
+        }, { status: 401 });
     }
+
+    const user = session.user as User & { _id: string };
+
+    if (!user?._id) {
+        return Response.json({
+            success: false,
+            message: "User ID not found in session"
+        }, { status: 400 });
+    }
+
     const userId = user._id;
-    const {AcceptMessages} = await request.json();
+    const { acceptMessages } = await request.json();
 
     try {
-        const UpdatedUser = await UserModel.findByIdAndUpdate(userId, { isAcceptingMessages : AcceptMessages }, {new : true});
+        const UpdatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            { isAcceptingMessages: acceptMessages },
+            { new: true }
+        );
 
-        if(!UpdatedUser){
+        if (!UpdatedUser) {
             return Response.json({
-                success : false,
-                message : "failed to update user status to accept messages"
-            }, {status : 404});
+                success: false,
+                message: "failed to update user status to accept messages"
+            }, { status: 404 });
         }
+
         return Response.json({
-            success : true,
-            message : "message acceptance status updated successfully",
+            success: true,
+            message: "message acceptance status updated successfully",
             UpdatedUser,
-        }, {status : 200});
+        }, { status: 200 });
 
-        
     } catch (error) {
-        console.log("failed to update user status to accept messages:", error);
+        console.log("failed to update user status:", error);
         return Response.json({
-            success : false,
-            message : "Failed to update user status to accept messages"
-        }, {status : 500});
+            success: false,
+            message: "Failed to update user status"
+        }, { status: 500 });
     }
-     
-
 }
 
 export async function GET(request: Request) {

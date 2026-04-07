@@ -3,10 +3,8 @@ import React from "react";
 import { toast } from "sonner";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -31,24 +29,30 @@ type MessageCardProps = {
   message: Message;
   onMessageDelete: (messageId: string) => void;
 };
+
 const MessageCard = ({ message, onMessageDelete }: MessageCardProps) => {
   const handleDeleteConfirm = async () => {
     const response = await axios.delete<ApiResponse>(
-      `/api/delete-message/${message._id}`,
+      `/api/delete-message/${message._id}`
     );
     toast(response.data.message);
     onMessageDelete(message._id.toString());
   };
 
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Card Title</CardTitle>
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>{message.content}</CardTitle> {/* ✅ real message */}
+            <CardDescription>
+              {new Date(message.createdAt).toLocaleString()} {/* ✅ real date */}
+            </CardDescription>
+          </div>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">
+              <Button variant="destructive" size="icon">
                 <X className="w-5 h-5" />
               </Button>
             </AlertDialogTrigger>
@@ -57,24 +61,21 @@ const MessageCard = ({ message, onMessageDelete }: MessageCardProps) => {
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action cannot be undone. This will permanently delete
-                  your account from our servers.
+                  this message from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onAuxClick={handleDeleteConfirm}>
+                <AlertDialogAction onClick={handleDeleteConfirm}> {/* ✅ onClick not onAuxClick */}
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
-          <CardDescription>Card Description</CardDescription>
-          <CardAction>Card Action</CardAction>
-        </CardHeader>
-        <CardContent></CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardHeader>
+      <CardContent />
+    </Card>
   );
 };
 
