@@ -11,13 +11,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { verifySchema } from "@/schemas/verifySchema";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // ✅ use shadcn Input instead of raw input
 
 const VerifyAccount = () => {
   const router = useRouter();
@@ -25,6 +25,9 @@ const VerifyAccount = () => {
 
   const form = useForm<z.infer<typeof verifySchema>>({
     resolver: zodResolver(verifySchema),
+    defaultValues: {
+      code: "", // ✅ fixes uncontrolled input error
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
@@ -34,12 +37,12 @@ const VerifyAccount = () => {
         code: data.code,
       });
       toast.success(response.data.message);
-      router.replace("sign-in");
+      router.replace("/sign-in"); // ✅ fixed leading slash
     } catch (error) {
-      console.error("Error during sign-up of user :", error);
+      console.error("Error during verification:", error);
       const axiosError = error as AxiosError<ApiResponse>;
-      let errorMessage = axiosError.response?.data.message;
-      axiosError.response?.data.message ||
+      const errorMessage =
+        axiosError.response?.data.message || // ✅ fixed error message logic
         "An error occurred during verification";
       toast.error(errorMessage);
     }
@@ -52,10 +55,7 @@ const VerifyAccount = () => {
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
             Verify Your Account
           </h1>
-          <p className="mb-4">
-            {" "}
-            Enter the verification code sent to your email
-          </p>
+          <p className="mb-4">Enter the verification code sent to your email</p>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -66,11 +66,7 @@ const VerifyAccount = () => {
                 <FormItem>
                   <FormLabel>Verification Code</FormLabel>
                   <FormControl>
-                    <input
-                      placeholder="code"
-                      {...field}
-                      className="w-full h-12 text-lg rounded-lg"
-                    />
+                    <Input placeholder="Enter verification code" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
